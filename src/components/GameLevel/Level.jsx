@@ -30,6 +30,7 @@ import {
 } from "../../utils/localStorage";
 import getNavigationLevels from "@/utils/getNavigationLevels";
 import { useTheme } from "next-themes";
+import useVisibility from '../../hooks/useVisibility'
 
 const Level = ({ id, level }) => {
   const { theme } = useTheme();
@@ -53,6 +54,8 @@ const Level = ({ id, level }) => {
   const [autoPlaceXs, setAutoPlaceXs] = useState(getAutoPlaceXsPreference);
   const [completed, setCompleted] = useState(false);
   const [boardLoaded, setBoardLoaded] = useState(false);
+  const isVisible = useVisibility()
+  const [timerRunning, setTimerRunning] = useState(false)
 
   const { previousLevel, nextLevel, previousDisabled, nextDisabled } =
     getNavigationLevels(id, level);
@@ -383,6 +386,17 @@ const Level = ({ id, level }) => {
     }
   }, [timer, board, boardLoaded]);
 
+  useEffect(() => {
+    console.log('isVisible', isVisible)
+    console.log('hasWon', hasWon)
+    if (!isVisible || hasWon) {
+      setTimerRunning(false)
+    }
+    if (isVisible && !hasWon) {
+      setTimerRunning(true)
+    }
+  }, [isVisible, hasWon])
+
   return (
     <div key={id} className="flex flex-col justify-center items-center pt-4">
       <div className="flex flex-col items-center">
@@ -440,7 +454,7 @@ const Level = ({ id, level }) => {
 
           <div className="flex justify-end">
             <Timer
-              isGameWon={hasWon}
+              run={timerRunning}
               onTimeUpdate={handleTimeUpdate}
               showTimer={showClock}
               initialTimer={timer}
