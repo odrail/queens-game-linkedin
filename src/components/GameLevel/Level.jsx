@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Giscus from "@giscus/react";
 import Board from "./components/Board";
@@ -49,6 +49,7 @@ const Level = ({ id, level }) => {
   );
   const [showClock, setShowClock] = useState(getShowClockPreference);
   const [autoPlaceXs, setAutoPlaceXs] = useState(getAutoPlaceXsPreference);
+  const history = useRef([])
 
   const { previousLevel, nextLevel, previousDisabled, nextDisabled } =
     getNavigationLevels(id, level);
@@ -67,10 +68,13 @@ const Level = ({ id, level }) => {
 
     if (currentValue === null) {
       newBoard[row][col] = "X";
+      addToHistory({ row, col, symbol: "X" })
     } else if (currentValue === "X") {
       placeQueen(newBoard, row, col);
+      addToHistory({ row, col, symbol: "Q" })
     } else if (currentValue === "Q") {
       removeQueen(newBoard, row, col);
+      addToHistory({ row, col, symbol: null })
     }
 
     // Check for win condition after updating the board
@@ -104,6 +108,7 @@ const Level = ({ id, level }) => {
     for (const [row, col] of squares) {
       if (newBoard[row][col] !== "Q") {
         newBoard[row][col] = "X";
+        addToHistory({ row, col, symbol: "X" })
       }
     }
     setBoard(newBoard);
@@ -269,6 +274,14 @@ const Level = ({ id, level }) => {
     });
   };
 
+  const addToHistory = ({row, col, symbol}) => {
+    history.current.push({
+      row,
+      col,
+      symbol
+    })
+  }
+
   const toggleClashingQueens = () => {
     const newSetting = !showClashingQueens;
     setShowClashingQueens(newSetting);
@@ -296,6 +309,21 @@ const Level = ({ id, level }) => {
   const handleTimeUpdate = (time) => {
     setTimer(time);
   };
+
+  const handleUndo = () => {
+    // TODO: save to localstorage
+    const newBoard = structuredClone(board);
+    const latest = history.current.pop();
+    console.log('latest', latest.symbol)
+    if (!latest) return
+    if (latest.symbol == "X") {
+      newBoard[latest.row][latest.col] = null
+    } else if (latest.symbol == "Q") {
+      removeQueen(newBoard, latest.row, latest.col);
+      newBoard[latest.row][latest.col] = "X"
+    }
+    setBoard(newBoard);
+  }
 
   const PreviousLevelButton = ({ children, className }) => {
     return (
@@ -430,6 +458,13 @@ const Level = ({ id, level }) => {
               showClashingQueens={showClashingQueens}
               clashingQueens={clashingQueens}
             />
+            <button 
+              className="border border-slate-500 rounded-full p-2 mr-2" 
+              onClick={handleUndo}
+              style={{ marginTop: '16px', width: '100%' }}
+            >
+              Undo
+            </button>
           </div>
         </div>
 
