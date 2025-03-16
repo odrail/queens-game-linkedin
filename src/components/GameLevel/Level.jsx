@@ -28,7 +28,7 @@ import {
 } from "../../utils/localStorage";
 import getNavigationLevels from "@/utils/getNavigationLevels";
 import { useTheme } from "next-themes";
-import { useTranslation } from "react-i18next";
+import { resolveBoard } from "@/engine";
 
 const Level = ({ id, level }) => {
   const { theme } = useTheme();
@@ -347,6 +347,11 @@ const Level = ({ id, level }) => {
     setClashingQueens(clashingSet);
   }, [board]);
 
+  const handleSuggest = () => {
+    console.log('levels[level]', levels[level])
+    const boardResolved = resolveBoard(board, levels[level].colorRegions)
+  }
+
   return (
     <div key={id} className="flex flex-col justify-center items-center pt-4">
       <div className="flex flex-col items-center">
@@ -435,6 +440,12 @@ const Level = ({ id, level }) => {
               clashingQueens={clashingQueens}
             />
           </div>
+          <button 
+              className="border border-slate-500 rounded-full p-2 mr-2 w-full mt-[16px]" 
+              onClick={handleSuggest}
+            >
+              Suggerimento
+            </button>
         </div>
 
         {showInstructions && <HowToPlay />}
