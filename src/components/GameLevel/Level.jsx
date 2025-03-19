@@ -28,7 +28,8 @@ import {
 } from "../../utils/localStorage";
 import getNavigationLevels from "@/utils/getNavigationLevels";
 import { useTheme } from "next-themes";
-import { resolveBoard } from "@/engine";
+import { resolveBoard } from "@/engine/index";
+import { useTranslation } from "react-i18next";
 
 const Level = ({ id, level }) => {
   const { theme } = useTheme();
@@ -444,7 +445,7 @@ const Level = ({ id, level }) => {
               className="border border-slate-500 rounded-full p-2 mr-2 w-full mt-[16px]" 
               onClick={handleSuggest}
             >
-              Suggerimento
+              {t('HINT')}
             </button>
         </div>
 
